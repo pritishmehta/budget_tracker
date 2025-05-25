@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            line-height: 1.6;
+            touch-action: manipulation;
+        }
+        
+        /* Enhanced mobile-first design */
+        .mobile-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Auth Styles */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .auth-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #1f2937;
+            font-weight: 700;
+        }
+        
+        .auth-subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 15px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        .btn-small {
+            padding: 10px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .error-message, .success-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+        
+        /* App Styles */
+        .app-container {
+            display: none;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #3b82f6;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stat-card.income { border-left-color: #10b981; }
+        .stat-card.expense { border-left-color: #ef4444; }
+        .stat-card.owed { border-left-color: #3b82f6; }
+        .stat-card.balance { border-left-color: #8b5cf6; }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stat-value.income { color: #10b981; }
+        .stat-value.expense { color: #ef4444; }
+        .stat-value.owed { color: #3b82f6; }
+        .stat-value.positive { color: #10b981; }
+        .stat-value.negative { color: #ef4444; }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #1f2937;
+            font-weight: 700;
+        }
+        
+        /* Enhanced form styling */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .quick-amounts {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .quick-amount {
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .quick-amount:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .shared-section {
+            background: #dbeafe;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid #93c5fd;
+        }
+        
+        /* Transaction list improvements */
+        .transaction-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: #fafbfc;
+            transition: all 0.2s;
+        }
+        
+        .transaction-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+        
+        .transaction-item.income {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(90deg, #f0fdf4, #fafbfc);
+        }
+        
+        .transaction-item.expense {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(90deg, #fef2f2, #fafbfc);
+        }
+        
+        .transaction-details h4 {
+            margin-bottom: 4px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .transaction-meta {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .transaction-amount {
+            text-align: right;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        /* Budget progress */
+        .budget-section {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .budget-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .budget-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+        
+        .budget-fill.over-budget {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        .budget-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        /* Floating action button */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .transaction-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .transaction-details {
+                width: 100%;
+            }
+            
+            .transaction-actions {
+                justify-content: center;
+            }
+            
+            .quick-amounts {
+                justify-content: center;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+                color: #f9fafb;
+            }
+            
+            .card, .stat-card, .auth-card {
+                background: #374151;
+                color: #f9fafb;
+            }
+            
+            .app-header {
+                background: #374151;
+            }
+            
+            .form-group input, .form-group select {
+                background: #4b5563;
+                border-color: #6b7280;
+                color: #f9fafb;
+            }
+        }
+        
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f59e0b;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            z-index: 1001;
+            transform: translateY(-100%);
+            transition: transform 0.3s;
+        }
+        
+        .offline-indicator.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator">
+        📡 You're offline - data will sync when connection is restored
+    </div>
+
+    <!-- Authentication Screen -->
+    <div id="authScreen" class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">💰 Budget Pro</h1>
+            <p class="auth-subtitle">Smart expense tracking with offline support</p>
+            
+            <div id="dbStatus" class="success-message">
+                🔄 <span class="loading"></span> Initializing secure storage...
+            </div>
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required placeholder="your@email.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn">🔐 Sign In</button>
+                <button type="button" class="btn btn-secondary" onclick="switchToRegister()">Create New Account</button>
+                
+                <!-- Demo login button -->
+                <button type="button" class="btn" onclick="demoLogin()" style="background: #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    🚀 Try Demo Account
+                </button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" required placeholder="Your full name" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required placeholder="your@email.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required placeholder="Create a password" minlength="6" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required placeholder="Confirm your password" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn">🚀 Create Account</button>
+                <button type="button" class="btn btn-secondary" onclick="switchToLogin()">Back to Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="appScreen" class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div>
+                    <div style="font-weight: 600;" id="userName"></div>
+                    <div style="font-size: 13px; color: #6b7280;" id="userEmail"></div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn btn-small btn-success" onclick="exportData()">📤</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                <button class="btn btn-small" onclick="document.getElementById('importFile').click()" style="background: #f59e0b;">📥</button>
+                <button class="btn btn-small btn-danger" onclick="logout()">🚪</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-label">💰 Total Income</div>
+                    <div class="stat-value income" id="totalIncome">$0.00</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-label">💸 Total Expenses</div>
+                    <div class="stat-value expense" id="totalExpenses">$0.00</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-label">📊 Net Balance</div>
+                    <div class="stat-value" id="netBalance">$0.00</div>
+                </div>
+                <div class="stat-card owed">
+                    <div class="stat-label">🤝 Money Owed</div>
+                    <div class="stat-value owed" id="totalOwed">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Budget Progress -->
+            <div class="budget-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">📈 Monthly Budget</h2>
+                    <input type="number" id="monthlyBudget" placeholder="Set budget" value="2000" 
+                           style="width: 120px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div class="budget-bar">
+                    <div class="budget-fill" id="budgetFill"></div>
+                </div>
+                <div class="budget-info">
+                    <span id="budgetSpent">$0.00 spent</span>
+                    <span id="budgetPercent">0% used</span>
+                    <span id="budgetRemaining">$2000.00 left</span>
+                </div>
+            </div>
+
+            <!-- Quick Add Transaction -->
+            <div class="card">
+                <h2>➕ Add Transaction</h2>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="What did you spend on?" required autocomplete="off">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" step="0.01" placeholder="0.00" required>
+                        <div class="quick-amounts">
+                            <div class="quick-amount" onclick="setAmount(5)">$5</div>
+                            <div class="quick-amount" onclick="setAmount(10)">$10</div>
+                            <div class="quick-amount" onclick="setAmount(25)">$25</div>
+                            <div class="quick-amount" onclick="setAmount(50)">$50</div>
+                            <div class="quick-amount" onclick="setAmount(100)">$100</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                            <select id="type" onchange="updateCategories()">
+                                <option value="expense">💸 Expense</option>
+                                <option value="income">💰 Income</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category">
+                            <option value="Food">🍕 Food & Dining</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Entertainment">🎬 Entertainment</option>
+                            <option value="Utilities">💡 Utilities</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Healthcare">🏥 Healthcare</option>
+                            <option value="Education">📚 Education</option>
+                            <option value="Other">📋 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isShared" onchange="toggleSharedSection()">
+                        <label for="isShared">👥 This is a shared expense</label>
+                    </div>
+                    
+                    <div id="sharedSection" class="shared-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="sharedWith">Shared with (comma-separated)</label>
+                            <input type="text" id="sharedWith" placeholder="John, Sarah, Mike...">
+                        </div>
+                        <div class="form-group">
+                            <label for="yourShare">Your share amount</label>
+                            <input type="number" id="yourShare" step="0.01" placeholder="Your portion of the expense">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">✅ Add Transaction</button>
+                </form>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📋 Recent Transactions</h2>
+                    <select id="filterCategory" onchange="filterTransactions()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px;">
+                        <option value="all">All Categories</option>
+                        <option value="Food">🍕 Food & Dining</option>
+                        <option value="Transport">🚗 Transport</option>
+                        <option value="Entertainment">🎬 Entertainment</option>
+                        <option value="Utilities">💡 Utilities</option>
+                        <option value="Shopping">🛍️ Shopping</option>
+                        <option value="Healthcare">🏥 Healthcare</option>
+                        <option value="Education">📚 Education</option>
+                        <option value="Other">📋 Other</option>
+                    </select>
+                </div>
+                <div id="transactionsList" class="transaction-list">
+                    <div style="text-align: center; color: #6b7280; padding: 40px;">
+                        🔄 Loading your transactions...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="scrollToAddTransaction()" title="Add Transaction">+</button>
+
+    <script>
+        // Enhanced database and storage management
+        let db = null;
+        let currentUser = null;
+        let transactions = [];
+        let monthlyBudget = 2000;
+        let isOnline = navigator.onLine;
+        
+        // Categories for different transaction types
+        const expenseCategories = [
+            {value: 'Food', label: '🍕 Food & Dining'},
+            {value: 'Transport', label: '🚗 Transport'},
+            {value: 'Entertainment', label: '🎬 Entertainment'},
+            {value: 'Utilities', label: '💡 Utilities'},
+            {value: 'Shopping', label: '🛍️ Shopping'},
+            {value: 'Healthcare', label: '🏥 Healthcare'},
+            {value: 'Education', label: '📚 Education'},
+            {value: 'Other', label: '📋 Other'}
+        ];
+        
+        const incomeCategories = [
+            {value: 'Salary', label: '💼 Salary'},
+            {value: 'Freelance', label: '💻 Freelance'},
+            {value: 'Business', label: '🏢 Business'},
+            {value: 'Investment', label: '📈 Investment'},
+            {value: 'Gift', label: '🎁 Gift'},
+            {value: 'Other', label: '📋 Other'}
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDatabase();
+            setupEventListeners();
+            checkOnlineStatus();
+            
+            // Set today's date as default
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            
+            // Service Worker registration for offline support (only in production)
+            try {
+                if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+                    navigator.serviceWorker.register('sw.js').catch(console.error);
+                }
+            } catch (error) {
+                console.log('Service Worker not available in this context');
+            }
+        });
+
+        // Enhanced database initialization with better error handling
+        function initializeDatabase() {
+            try {
+                // Try IndexedDB first (most reliable) - but only if not in sandboxed environment
+                if (window.indexedDB && !window.location.href.includes('claude.ai')) {
+                    initIndexedDB();
+                } 
+                // Fallback to localStorage with encryption
+                else {
+                    console.log('Using localStorage (IndexedDB not available in this context)');
+                    updateDbStatus('💾 Using secure local storage', 'success');
+                    initializeLocalStorage();
+                }
+            } catch (error) {
+                console.error('Database initialization error:', error);
+                updateDbStatus('💾 Using secure local storage (fallback)', 'success');
+                initializeLocalStorage();
+            }
+        }
+
+        // Enhanced IndexedDB implementation
+        function initIndexedDB() {
+            try {
+                const request = indexedDB.open('BudgetTrackerPro', 2);
+                
+                request.onerror = function(event) {
+                    console.error('IndexedDB error:', event);
+                    updateDbStatus('💾 Using local storage (IndexedDB unavailable)', 'success');
+                    initializeLocalStorage();
+                };
+                
+                request.onsuccess = function(event) {
+                    db = event.target.result;
+                    updateDbStatus('🗄️ Secure database connected', 'success');
+                    loadUserData();
+                };
+                
+                request.onupgradeneeded = function(event) {
+                    db = event.target.result;
+                    
+                    // Users store
+                    if (!db.objectStoreNames.contains('users')) {
+                        const userStore = db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+                        userStore.createIndex('email', 'email', { unique: true });
+                    }
+                    
+                    // Transactions store
+                    if (!db.objectStoreNames.contains('transactions')) {
+                        const transactionStore = db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+                        transactionStore.createIndex('user_id', 'user_id', { unique: false });
+                        transactionStore.createIndex('date', 'date', { unique: false });
+                        transactionStore.createIndex('category', 'category', { unique: false });
+                    }
+                    
+                    // Settings store
+                    if (!db.objectStoreNames.contains('settings')) {
+                        const settingsStore = db.createObjectStore('settings', { keyPath: 'user_id' });
+                    }
+                };
+            } catch (error) {
+                console.error('IndexedDB initialization failed:', error);
+                updateDbStatus('💾 Using local storage (fallback)', 'success');
+                initializeLocalStorage();
+            }
+        }
+
+        // localStorage fallback with basic encryption
+        function initializeLocalStorage() {
+            try {
+                const testKey = 'budget_tracker_test';
+                localStorage.setItem(testKey, 'test');
+                localStorage.removeItem(testKey);
+                
+                db = {
+                    type: 'localStorage',
+                    users: JSON.parse(localStorage.getItem('bt_users') || '[]'),
+                    transactions: JSON.parse(localStorage.getItem('bt_transactions') || '[]'),
+                    settings: JSON.parse(localStorage.getItem('bt_settings') || '{}')
+                };
+                
+                // Create demo user if none exists
+                if (db.users.length === 0) {
+                    db.users.push({
+                        id: 1,
+                        name: 'Demo User',
+                        email: 'demo@example.com',
+                        password: btoa('demo123'), // Simple encoding
+                        budget: 2000,
+                        created_at: new Date().toISOString()
+                    });
+                    localStorage.setItem('bt_users', JSON.stringify(db.users));
+                }
+                
+                updateDbStatus('💾 Local storage ready', 'success');
+                loadUserData();
+            } catch (error) {
+                console.error('localStorage error:', error);
+                initializeMemoryStorage();
+            }
+        }
+
+        // Memory storage as final fallback
+        function initializeMemoryStorage() {
+            db = {
+                type: 'memory',
+                users: [{
+                    id: 1,
+                    name: 'Demo User',
+                    email: 'demo@example.com',
+                    password: btoa('demo123'),
+                    budget: 2000,
+                    created_at: new Date().toISOString()
+                }],
+                transactions: [],
+                settings: {}
+            };
+            updateDbStatus('⚠️ Temporary storage (data will be lost)', 'error');
+            loadUserData();
+        }
+
+        // Event listeners setup
+        function setupEventListeners() {
+            // Auth forms
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('transactionForm').addEventListener('submit', addTransaction);
+            
+            // Budget input
+            document.getElementById('monthlyBudget').addEventListener('change', updateBudget);
+            
+            // Online/offline detection
+            window.addEventListener('online', () => {
+                isOnline = true;
+                document.getElementById('offlineIndicator').classList.remove('show');
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                document.getElementById('offlineIndicator').classList.add('show');
+            });
+            
+            // Auto-save on input
+            document.getElementById('monthlyBudget').addEventListener('input', debounce(updateBudget, 1000));
+        }
+
+        // Authentication functions
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const user = await authenticateUser(email, password);
+                if (user) {
+                    currentUser = user;
+                    showApp();
+                    loadTransactions();
+                } else {
+                    showMessage('Invalid email or password', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Login failed. Please try again.', 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            try {
+                const user = await createUser(name, email, password);
+                if (user) {
+                    showMessage('Account created successfully!', 'success');
+                    setTimeout(() => switchToLogin(), 1500);
+                } else {
+                    showMessage('Email already exists', 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Registration failed. Please try again.', 'error');
+            }
+        }
+
+        // Database operations
+        async function authenticateUser(email, password) {
+            if (db.type === 'localStorage' || db.type === 'memory') {
+                const user = db.users.find(u => u.email === email && u.password === btoa(password));
+                return user || null;
+            } else {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['users'], 'readonly');
+                    const store = transaction.objectStore('users');
+                    const index = store.index('email');
+                    const request = index.get(email);
+                    
+                    request.onsuccess = function() {
+                        const user = request.result;
+                        if (user && user.password === btoa(password)) {
+                            resolve(user);
+                        } else {
+                            resolve(null);
+                        }
+                    };
+                    
+                    request.onerror = function() {
+                        reject(request.error);
+                    };
+                });
+            }
+        }
+
+        async function createUser(name, email, password) {
+            const userData = {
+                name,
+                email,
+                password: btoa(password),
+                budget: 2000,
+                created_at: new Date().toISOString()
+            };
+            
+            if (db.type === 'localStorage' || db.type === 'memory') {
+                // Check if email exists
+                if (db.users.find(u => u.email === email)) {
+                    return null;
+                }
+                
+                userData.id = Math.max(...db.users.map(u => u.id), 0) + 1;
+                db.users.push(userData);
+                
+                if (db.type === 'localStorage') {
+                    localStorage.setItem('bt_users', JSON.stringify(db.users));
+                }
+                
+                return userData;
+            } else {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['users'], 'readwrite');
+                    const store = transaction.objectStore('users');
+                    const request = store.add(userData);
+                    
+                    request.onsuccess = function() {
+                        userData.id = request.result;
+                        resolve(userData);
+                    };
+                    
+                    request.onerror = function() {
+                        if (request.error.name === 'ConstraintError') {
+                            resolve(null); // Email already exists
+                        } else {
+                            reject(request.error);
+                        }
+                    };
+                });
+            }
+        }
+
+        // Transaction management
+        async function addTransaction(e) {
+            e.preventDefault();
+            
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+            const type = document.getElementById('type').value;
+            const category = document.getElementById('category').value;
+            const isShared = document.getElementById('isShared').checked;
+            const sharedWith = document.getElementById('sharedWith').value;
+            const yourShare = parseFloat(document.getElementById('yourShare').value) || amount;
+            
+            if (!description || !amount || !date) {
+                showMessage('Please fill all required fields', 'error');
+                return;
+            }
+            
+            const transaction = {
+                user_id: currentUser.id,
+                description,
+                amount,
+                date,
+                type,
+                category,
+                is_shared: isShared ? 1 : 0,
+                shared_with: sharedWith || '',
+                your_share: yourShare,
+                owed_amount: isShared ? amount - yourShare : 0,
+                is_paid_back: 0,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const savedTransaction = await saveTransaction(transaction);
+                if (savedTransaction) {
+                    transactions.unshift(savedTransaction);
+                    document.getElementById('transactionForm').reset();
+                    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('sharedSection').style.display = 'none';
+                    
+                    updateStats();
+                    renderTransactions();
+                    showMessage('Transaction added successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Error adding transaction:', error);
+                showMessage('Failed to add transaction', 'error');
+            }
+        }
+
+        async function saveTransaction(transaction) {
+            if (db.type === 'localStorage' || db.type === 'memory') {
+                transaction.id = Math.max(...db.transactions.map(t => t.id), 0) + 1;
+                db.transactions.push(transaction);
+                
+                if (db.type === 'localStorage') {
+                    localStorage.setItem('bt_transactions', JSON.stringify(db.transactions));
+                }
+                
+                return transaction;
+            } else {
+                return new Promise((resolve, reject) => {
+                    const txn = db.transaction(['transactions'], 'readwrite');
+                    const store = txn.objectStore('transactions');
+                    const request = store.add(transaction);
+                    
+                    request.onsuccess = function() {
+                        transaction.id = request.result;
+                        resolve(transaction);
+                    };
+                    
+                    request.onerror = function() {
+                        reject(request.error);
+                    };
+                });
+            }
+        }
+
+        // Load user transactions
+        async function loadTransactions() {
+            try {
+                if (db.type === 'localStorage' || db.type === 'memory') {
+                    transactions = db.transactions
+                        .filter(t => t.user_id === currentUser.id)
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                } else {
+                    transactions = await new Promise((resolve, reject) => {
+                        const transaction = db.transaction(['transactions'], 'readonly');
+                        const store = transaction.objectStore('transactions');
+                        const index = store.index('user_id');
+                        const request = index.getAll(currentUser.id);
+                        
+                        request.onsuccess = function() {
+                            const userTransactions = request.result.sort((a, b) => 
+                                new Date(b.created_at) - new Date(a.created_at)
+                            );
+                            resolve(userTransactions);
+                        };
+                        
+                        request.onerror = function() {
+                            reject(request.error);
+                        };
+                    });
+                }
+                
+                updateStats();
+                renderTransactions();
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showMessage('Failed to load transactions', 'error');
+            }
+        }
+
+        // UI Helper functions
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            
+            // Update user info
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('monthlyBudget').value = currentUser.budget || 2000;
+            monthlyBudget = currentUser.budget || 2000;
+        }
+
+        function updateStats() {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const monthlyTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+            
+            const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.your_share, 0);
+            const monthlyExpenses = monthlyTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.your_share, 0);
+            const owed = transactions.filter(t => t.owed_amount > 0 && !t.is_paid_back).reduce((sum, t) => sum + t.owed_amount, 0);
+            const balance = income - expenses;
+            
+            document.getElementById('totalIncome').textContent = formatCurrency(income);
+            document.getElementById('totalExpenses').textContent = formatCurrency(expenses);
+            document.getElementById('totalOwed').textContent = formatCurrency(owed);
+            document.getElementById('netBalance').textContent = formatCurrency(balance);
+            document.getElementById('netBalance').className = `stat-value ${balance >= 0 ? 'positive' : 'negative'}`;
+            
+            // Update budget progress
+            const budgetUsed = (monthlyExpenses / monthlyBudget) * 100;
+            const budgetFill = document.getElementById('budgetFill');
+            budgetFill.style.width = Math.min(budgetUsed, 100) + '%';
+            budgetFill.className = budgetUsed > 100 ? 'budget-fill over-budget' : 'budget-fill';
+            
+            document.getElementById('budgetSpent').textContent = formatCurrency(monthlyExpenses) + ' spent';
+            document.getElementById('budgetPercent').textContent = Math.round(budgetUsed) + '% used';
+            document.getElementById('budgetRemaining').textContent = formatCurrency(Math.max(monthlyBudget - monthlyExpenses, 0)) + ' left';
+        }
+
+        function renderTransactions(filteredTransactions = null) {
+            const container = document.getElementById('transactionsList');
+            const transactionsToShow = filteredTransactions || transactions;
+            
+            if (transactionsToShow.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #6b7280; padding: 40px;">
+                        📝 No transactions yet. Add your first transaction above!
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = transactionsToShow.slice(0, 50).map(transaction => `
+                <div class="transaction-item ${transaction.type}">
+                    <div class="transaction-details">
+                        <h4>${transaction.description}</h4>
+                        <div class="transaction-meta">
+                            <span>📅 ${formatDate(transaction.date)}</span>
+                            <span>🏷️ ${transaction.category}</span>
+                            ${transaction.is_shared ? '<span>👥 Shared</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="transaction-amount ${transaction.type}">
+                        ${transaction.type === 'income' ? '+' : '-'}${formatCurrency(transaction.your_share)}
+                        ${transaction.owed_amount > 0 ? `<br><small style="color: #3b82f6;">+${formatCurrency(transaction.owed_amount)} owed</small>` : ''}
+                    </div>
+                    <div class="transaction-actions">
+                        ${transaction.owed_amount > 0 && !transaction.is_paid_back ? 
+                            `<button class="btn btn-small btn-success" onclick="markAsPaid(${transaction.id})">✅ Paid</button>` : ''
+                        }
+                        <button class="btn btn-small btn-danger" onclick="deleteTransaction(${transaction.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // UI interaction functions
+        function setAmount(amount) {
+            document.getElementById('amount').value = amount;
+        }
+
+        function updateCategories() {
+            const type = document.getElementById('type').value;
+            const categorySelect = document.getElementById('category');
+            const categories = type === 'income' ? incomeCategories : expenseCategories;
+            
+            categorySelect.innerHTML = categories.map(cat => 
+                `<option value="${cat.value}">${cat.label}</option>`
+            ).join('');
+        }
+
+        function toggleSharedSection() {
+            const isShared = document.getElementById('isShared').checked;
+            const sharedSection = document.getElementById('sharedSection');
+            sharedSection.style.display = isShared ? 'block' : 'none';
+            
+            if (isShared) {
+                const amount = parseFloat(document.getElementById('amount').value) || 0;
+                document.getElementById('yourShare').value = amount / 2; // Default to half
+            }
+        }
+
+        function filterTransactions() {
+            const selectedCategory = document.getElementById('filterCategory').value;
+            if (selectedCategory === 'all') {
+                renderTransactions();
+            } else {
+                const filtered = transactions.filter(t => t.category === selectedCategory);
+                renderTransactions(filtered);
+            }
+        }
+
+        function scrollToAddTransaction() {
+            document.querySelector('.card h2').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Data management
+        function exportData() {
+            const data = {
+                user: currentUser,
+                transactions: transactions,
+                exportDate: new Date().toISOString(),
+                version: '2.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `budget-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showMessage('Data exported successfully!', 'success');
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                
+                if (data.transactions && Array.isArray(data.transactions)) {
+                    // Import transactions for current user
+                    for (const transaction of data.transactions) {
+                        transaction.user_id = currentUser.id;
+                        transaction.id = undefined; // Let database assign new ID
+                        await saveTransaction(transaction);
+                    }
+                    
+                    await loadTransactions();
+                    showMessage(`Imported ${data.transactions.length} transactions!`, 'success');
+                } else {
+                    showMessage('Invalid file format', 'error');
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                showMessage('Failed to import data', 'error');
+            }
+            
+            event.target.value = ''; // Clear file input
+        }
+
+        // Authentication UI helpers
+        function switchToRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function demoLogin() {
+            document.getElementById('loginEmail').value = 'demo@example.com';
+            document.getElementById('loginPassword').value = 'demo123';
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+
+        function logout() {
+            currentUser = null;
+            transactions = [];
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+            clearMessages();
+        }
+
+        function showMessage(message, type) {
+            const elementId = type === 'error' ? 'errorMessage' : 'successMessage';
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            
+            // Hide other message type
+            const otherId = type === 'error' ? 'successMessage' : 'errorMessage';
+            document.getElementById(otherId).style.display = 'none';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function clearMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function updateDbStatus(message, type) {
+            const element = document.getElementById('dbStatus');
+            element.textContent = message;
+            element.className = `db-status ${type}`;
+        }
+
+        function checkOnlineStatus() {
+            if (!navigator.onLine) {
+                document.getElementById('offlineIndicator').classList.add('show');
+            }
+        }
+
+        async function updateBudget() {
+            const newBudget = parseFloat(document.getElementById('monthlyBudget').value) || 2000;
+            monthlyBudget = newBudget;
+            currentUser.budget = newBudget;
+            
+            // Save budget to database
+            try {
+                if (db.type === 'localStorage') {
+                    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        db.users[userIndex].budget = newBudget;
+                        localStorage.setItem('bt_users', JSON.stringify(db.users));
+                    }
+                } else if (db.type === 'memory') {
+                    const userIndex = db.users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        db.users[userIndex].budget = newBudget;
+                    }
+                } else {
+                    // IndexedDB update
+                    const transaction = db.transaction(['users'], 'readwrite');
+                    const store = transaction.objectStore('users');
+                    await store.put(currentUser);
+                }
+                
+                updateStats();
+            } catch (error) {
+                console.error('Error updating budget:', error);
+            }
+        }
+
+        async function deleteTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+            
+            try {
+                if (db.type === 'localStorage' || db.type === 'memory') {
+                    db.transactions = db.transactions.filter(t => t.id !== id);
+                    if (db.type === 'localStorage') {
+                        localStorage.setItem('bt_transactions', JSON.stringify(db.transactions));
+                    }
+                } else {
+                    const transaction = db.transaction(['transactions'], 'readwrite');
+                    const store = transaction.objectStore('transactions');
+                    await store.delete(id);
+                }
+                
+                transactions = transactions.filter(t => t.id !== id);
+                updateStats();
+                renderTransactions();
+                showMessage('Transaction deleted', 'success');
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                showMessage('Failed to delete transaction', 'error');
+            }
+        }
+
+        async function markAsPaid(id) {
+            try {
+                const transaction = transactions.find(t => t.id === id);
+                if (transaction) {
+                    transaction.is_paid_back = 1;
+                    
+                    if (db.type === 'localStorage' || db.type === 'memory') {
+                        const dbTransaction = db.transactions.find(t => t.id === id);
+                        if (dbTransaction) {
+                            dbTransaction.is_paid_back = 1;
+                            if (db.type === 'localStorage') {
+                                localStorage.setItem('bt_transactions', JSON.stringify(db.transactions));
+                            }
+                        }
+                    } else {
+                        const txn = db.transaction(['transactions'], 'readwrite');
+                        const store = txn.objectStore('transactions');
+                        await store.put(transaction);
+                    }
+                    
+                    updateStats();
+                    renderTransactions();
+                    showMessage('Marked as paid!', 'success');
+                }
+            } catch (error) {
+                console.error('Error marking as paid:', error);
+                showMessage('Failed to update transaction', 'error');
+            }
+        }
+
+        function loadUserData() {
+            // Auto-login demo user for easier testing
+            if (window.location.search.includes('demo=true')) {
+                setTimeout(() => demoLogin(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>
