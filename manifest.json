@@ -1,0 +1,92 @@
+{
+  "name": "Budget Tracker Pro",
+  "short_name": "BudgetPro",
+  "description": "Smart expense tracking with offline support",
+  "version": "2.0.0",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "scope": "./",
+  "lang": "en",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/72x72/3b82f6/ffffff?text=💰",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/96x96/3b82f6/ffffff?text=💰",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/128x128/3b82f6/ffffff?text=💰",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/144x144/3b82f6/ffffff?text=💰",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/152x152/3b82f6/ffffff?text=💰",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/192x192/3b82f6/ffffff?text=💰",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/384x384/3b82f6/ffffff?text=💰",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/3b82f6/ffffff?text=💰",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Expense",
+      "short_name": "Add Expense",
+      "description": "Quickly add a new expense",
+      "url": "./?action=add-expense",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/ef4444/ffffff?text=💸",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "View Stats",
+      "short_name": "Stats",
+      "description": "View your spending statistics",
+      "url": "./?action=view-stats",
+      "icons": [
+        {
+          "src": "https://via.placeholder.com/96x96/10b981/ffffff?text=📊",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
